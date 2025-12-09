@@ -41,8 +41,6 @@ services:
       args:
         - VITE_API_URL=http://localhost:16014/api
     image: pulga-frontend:integration
-    ports:
-      - "16005:3000"  # Puerto opcional para acceso directo
     networks:
       - appnet
     restart: unless-stopped
