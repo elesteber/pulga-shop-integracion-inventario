@@ -1,0 +1,969 @@
+openapi: 3.0.3
+info:
+  title: API Inventario
+  version: 1.0.0
+  description: >
+    Microservicio encargado de la gestión de productos y tiendas. <br>
+    Operaciones de creación, actualización, eliminación y consulta de productos y tiendas. <br><br>
+    Autenticación vía JWT en el header: Authorization: Bearer {token}
+servers:
+  - url: http://localhost:3000/api
+    descripcion: Local (development)
+  - url: https://pulga-shop-inventario-api.onrender.com/api
+    description: Cloud (staging)
+tags:
+  - name: Productos
+    description: Gestión de productos y stock
+  - name: Tiendas
+    description: Gestión de tiendas
+  - name: Reservas
+    description: Gestión de reservas de stock (checkout)
+security:
+  - bearerAuth: []
+
+paths:
+  /productos:
+    post:
+      tags: [Productos]
+      summary: Crear producto
+      description: >
+        Crea un nuevo producto asociado a una tienda activa. El SKU se genera automáticamente. <br>
+        Campos opcionales reciben valores por defecto si no se envían.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductoPost'
+      responses:
+        '201':
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoGet'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                stockInvalido:
+                  value:
+                    message: El stock debe ser al menos 1
+                    error: STOCK_INVALIDO
+                costoInvalido:
+                  value:
+                    message: El costo debe ser al menos 1
+                    error: PRECIO_INVALIDO
+        '404':
+          description: Tienda no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: La tienda no existe
+                error: TIENDA_NO_EXISTE
+        '409':
+          description: Producto con SKU ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Producto con SKU: 'T3-MOUSE-GAMER-GENERAL-NUEVO' ya existe"
+                error: PRODUCTO_YA_EXISTE
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+    get:
+      tags: [Productos]
+      summary: Listar productos del vendedor
+      description: >
+        Devuelve productos pertenecientes a las tiendas del vendedor autenticado. <br>
+        Soporta paginación y filtros por tienda, rango de costo y estado activo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id_tienda
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filtra por ID de tienda
+        - name: costo_min
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Costo mínimo (gte)
+        - name: costo_max
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Costo máximo (lte)
+        - name: activo
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [true, false, all]
+            default: true
+          description: Filtra por estado activo
+        - name: sku
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtra por SKU
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Página (>=1)
+        - name: take
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
+          description: Tamaño de página (1-30)
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: ASC
+          description: Orden por fecha_creacion
+      responses:
+        '200':
+          description: Lista paginada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductosPaginados'
+        '400':
+          description: Rango inválido (costo_min > costo_max)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: El costo mínimo no puede ser mayor que el costo máximo
+                error: PRECIO_INVALIDO
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /productos/{sku}:
+    get:
+      tags: [Productos]
+      summary: Obtener producto por SKU
+      description: >
+        Retorna un producto activo por su SKU.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/skuParam'
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoGet'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Producto con SKU 'ABC' no encontrado
+                code: NO_ENCONTRADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+    patch:
+      tags: [Productos]
+      summary: Actualizar producto
+      description: >
+        Actualiza campos del producto. Todos los campos son opcionales, se requiere al menos uno. <br>
+        Validaciones de no negativo para stock y costo. <br>
+        Solo el vendedor dueño del producto puede actualizarlo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/skuParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoPatch'
+      responses:
+        '200':
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoGet'
+        '400':
+          description: Datos inválidos o no autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                stockNegativo:
+                  value:
+                    message: El stock no puede ser negativo
+                    error: STOCK_INVALIDO
+                costoNegativo:
+                  value:
+                    message: El costo no puede ser negativo
+                    error: PRECIO_INVALIDO
+                noAutorizado:
+                  value:
+                    message: No tienes permisos para actualizar este producto
+                    error: NO_AUTORIZADO
+        '404':
+          description: Producto no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: El producto con SKU ABC no existe
+                error: NO_ENCONTRADO
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+    delete:
+      tags: [Productos]
+      summary: Eliminar producto
+      description: >
+        Marca el producto como inactivo si el vendedor es dueño.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/skuParam'
+      responses:
+        '200':
+          description: Eliminado exitosamente
+        '404':
+          description: Producto no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: El producto con SKU ABC no existe
+                error: NO_ENCONTRADO
+        '400':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: No tienes permisos para eliminar este producto
+                error: NO_AUTORIZADO
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /tiendas:
+    get:
+      tags: [Tiendas]
+      summary: Listar tiendas del vendedor
+      description: >
+        Retorna tiendas activas del vendedor autenticado con paginación.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Página (>=1)
+        - name: take
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
+          description: Tamaño de página (1-30)
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: ASC
+          description: Orden por fecha_creacion
+      responses:
+        '200':
+          description: Lista paginada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TiendasPaginadas'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+    post:
+      tags: [Tiendas]
+      summary: Crear tienda
+      description: >
+        Crea una tienda asociada al vendedor autenticado.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TiendaPost'
+      responses:
+        '201':
+          description: Tienda creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TiendaGet'
+        '404':
+          description: Ciudad no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "La ciudad con el ID: '99' no existe"
+                error: CIUDAD_NO_EXISTE
+        '409':
+          description: Conflicto (nombre duplicado)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Tienda con el nombre: \"CompuShop\" ya existe"
+                error: TIENDA_YA_EXISTE
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /tiendas/{id_tienda}:
+    get:
+      tags: [Tiendas]
+      summary: Obtener tienda
+      description: >
+        Retorna detalles de una tienda activa.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/id_tiendaParam'
+      responses:
+        '200':
+          description: Tienda encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TiendaGet'
+        '404':
+          description: No encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Tienda no existe
+                error: TIENDA_NO_ENCONTRADA
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /reservas:
+    post:
+      tags: [Reservas]
+      summary: Reservar stock para una orden (inicio de checkout)
+      description: >
+        Realiza una reserva temporal de stock para una orden.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservaRequest'
+      responses:
+        '200':
+          description: Reserva creada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: La cantidad debe ser mayor a cero
+                error: DATOS_ERRONEOS
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /reservas/{id_orden}:
+    patch:
+      tags: [Reservas]
+      summary: Confirmar reserva de stock tras pago exitoso
+      description: >
+        Confirma una reserva previamente realizada para una orden.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/idOrden'
+      responses:
+        '200':
+          description: Reserva confirmada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '400':
+          description: Stock insuficiente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Stock insuficiente o producto no disponible: T3-MOUSE-GAMER-GENERAL-NUEVO"
+                error: "STOCK_INSUFICIENTE"
+        '404':
+          description: Orden no encontrada o reserva expirada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: La reserva con ID 123 no fue encontrada
+                error: RESERVA_NO_ENCONTRADA
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+components:
+  schemas:
+    ProductoGet:
+      type: object
+      properties:
+        id_producto:
+          type: integer
+        id_tienda:
+          type: integer
+        nombre:
+          type: string
+        stock:
+          type: integer
+        costo:
+          type: integer
+        sku:
+          type: string
+        condicion:
+          type: string
+          enum: [NUEVO, USADO, REACONDICIONADO]
+        fecha_creacion:
+          type: string
+          format: date-time
+        marca:
+          type: string
+        categoria:
+          type: string
+          enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
+        descripcion:
+          type: string
+        activo:
+          type: boolean
+        foto_referencia:
+          type: string
+          nullable: true
+        peso:
+          type: number
+        alto:
+          type: integer
+        largo:
+          type: integer
+        ancho:
+          type: integer
+      required:
+        - id_producto
+        - id_tienda
+        - nombre
+        - stock
+        - costo
+        - sku
+        - condicion
+        - fecha_creacion
+        - peso
+        - alto
+        - largo
+        - ancho
+      example:
+        id_producto: 10
+        id_tienda: 3
+        nombre: "Mouse Gamer"
+        stock: 25
+        costo: 19990
+        sku: "T3-MOUSE-GAMER-GENERAL-NUEVO"
+        condicion: NUEVO
+        fecha_creacion: "2025-01-10T12:00:00Z"
+        marca: "Genérica"
+        categoria: "GENERAL"
+        descripcion: "Sin descripcion"
+        activo: true
+        foto_referencia: "https://cloudinary.com/image.jpg"
+        peso: 0.5
+        alto: 5
+        largo: 10
+        ancho: 8
+
+    ProductoPost:
+      type: object
+      properties:
+        id_tienda:
+          type: integer
+          minimum: 1
+        nombre:
+          type: string
+          minLength: 3
+          maxLength: 100
+        stock:
+          type: integer
+          minimum: 1
+        costo:
+          type: integer
+          minimum: 1
+        condicion:
+          type: string
+          enum: [NUEVO, USADO, REACONDICIONADO]
+          default: NUEVO
+        marca:
+          type: string
+          minLength: 3
+          maxLength: 50
+        categoria:
+          type: string
+          enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
+          default: GENERAL
+        descripcion:
+          type: string
+          minLength: 3
+          maxLength: 1000
+        peso:
+          type: number
+          minimum: 0.1
+          maximum: 999.9
+        alto:
+          type: integer
+          minimum: 1
+        largo:
+          type: integer
+          minimum: 1
+        ancho:
+          type: integer
+          minimum: 1
+        file:
+          type: string
+          format: binary
+          description: Imagen del producto (opcional)
+      required:
+        - id_tienda
+        - nombre
+        - stock
+        - costo
+        - peso
+        - alto
+        - largo
+        - ancho
+      example:
+        id_tienda: 3
+        nombre: "Mouse Gamer"
+        stock: 25
+        costo: 19990
+        condicion: NUEVO
+        marca: "Genérica"
+        categoria: GENERAL
+        descripcion: "Sin descripcion"
+        peso: 0.5
+        alto: 5
+        largo: 10
+        ancho: 8
+
+    ProductoPatch:
+      type: object
+      minProperties: 1
+      properties:
+        stock:
+          type: integer
+          minimum: 0
+        costo:
+          type: integer
+          minimum: 0
+        descripcion:
+          type: string
+          minLength: 3
+          maxLength: 1000
+        peso:
+          type: number
+          minimum: 0.1
+          maximum: 999.9
+        alto:
+          type: integer
+          minimum: 1
+        largo:
+          type: integer
+          minimum: 1
+        ancho:
+          type: integer
+          minimum: 1
+      example:
+        costo: 17990
+        stock: 30
+        peso: 0.6
+
+    ProductosPaginados:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductoGet'
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+            take:
+              type: integer
+            itemCount:
+              type: integer
+            pageCount:
+              type: integer
+            hasPreviousPage:
+              type: boolean
+            hasNextPage:
+              type: boolean
+      example:
+        data:
+          - id_producto: 1
+            id_tienda: 3
+            nombre: "Mouse Gamer"
+            stock: 25
+            costo: 19990
+            sku: "T3-MOUSE-GAMER-GENERAL-NUEVO"
+            condicion: NUEVO
+            fecha_creacion: "2025-01-10T12:00:00Z"
+            marca: "Genérica"
+            categoria: "GENERAL"
+            descripcion: "Sin descripcion"
+            activo: true
+            foto_referencia: null
+            peso: 0.5
+            alto: 5
+            largo: 10
+            ancho: 8
+          - id_producto: 2
+            id_tienda: 3
+            nombre: "Teclado Mecánico"
+            stock: 15
+            costo: 45990
+            sku: "T3-TECLADO-MECANICO-GENERAL-NUEVO"
+            condicion: NUEVO
+            fecha_creacion: "2025-01-11T14:30:00Z"
+            marca: "Genérica"
+            categoria: "ELECTRÓNICA"
+            descripcion: "Teclado mecánico RGB"
+            activo: true
+            foto_referencia: "https://cloudinary.com/teclado.jpg"
+            peso: 1.2
+            alto: 3
+            largo: 45
+            ancho: 15
+        meta:
+          page: 1
+          take: 10
+          itemCount: 2
+          pageCount: 1
+          hasPreviousPage: false
+          hasNextPage: false
+
+    TiendaPost:
+      type: object
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+        id_ciudad:
+          type: integer
+          minimum: 1
+        descripcion:
+          type: string
+          maxLength: 200
+        direccion:
+          type: string
+        telefono:
+          type: string
+        online:
+          type: boolean
+      required:
+        - nombre
+        - id_ciudad
+        - descripcion
+        - direccion
+        - telefono
+        - online
+      example:
+        nombre: "CompuShop"
+        id_ciudad: 1
+        descripcion: "Tecnología y accesorios"
+        direccion: "Av. Central 123"
+        telefono: "912345678"
+        online: true
+
+    TiendaGet:
+      type: object
+      properties:
+        id_tienda:
+          type: integer
+        id_vendedor:
+          type: string
+        nombre:
+          type: string
+        id_ciudad:
+          type: integer
+        descripcion:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+        fecha_creacion:
+          type: string
+          format: date-time
+        online:
+          type: boolean
+      required:
+        - id_tienda
+        - id_vendedor
+        - nombre
+        - id_ciudad
+        - descripcion
+        - direccion
+        - telefono
+        - fecha_creacion
+        - online
+      example:
+        id_tienda: 3
+        id_vendedor: "507f1f77bcf86cd799439011"
+        nombre: "CompuShop"
+        id_ciudad: 1
+        descripcion: "Tecnología y accesorios"
+        direccion: "Av. Central 123"
+        telefono: "912345678"
+        fecha_creacion: "2025-01-10T12:00:00Z"
+        online: true
+
+    TiendasPaginadas:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TiendaGet'
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+            take:
+              type: integer
+            itemCount:
+              type: integer
+            pageCount:
+              type: integer
+            hasPreviousPage:
+              type: boolean
+            hasNextPage:
+              type: boolean
+      example:
+        data:
+          - id_tienda: 3
+            id_vendedor: "507f1f77bcf86cd799439011"
+            nombre: "CompuShop"
+            id_ciudad: 1
+            descripcion: "Tecnología y accesorios"
+            direccion: "Av. Central 123"
+            telefono: "912345678"
+            fecha_creacion: "2025-01-10T12:00:00Z"
+            online: true
+          - id_tienda: 5
+            id_vendedor: "507f1f77bcf86cd799439011"
+            nombre: "FashionStore"
+            id_ciudad: 2
+            descripcion: "Ropa y accesorios de moda"
+            direccion: "Jr. Lima 456"
+            telefono: "987654321"
+            fecha_creacion: "2025-01-12T09:15:00Z"
+            online: false
+        meta:
+          page: 1
+          take: 10
+          itemCount: 2
+          pageCount: 1
+          hasPreviousPage: false
+          hasNextPage: false
+
+    ReservaRequest:
+      type: object
+      properties:
+        id_orden:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku:
+                type: string
+              cantidad_reservada:
+                type: integer
+      required:
+        - id_orden
+        - items
+
+    ReservaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        id_orden:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+      required:
+        - message
+        - error
+      example:
+        message: direccion debe ser texto
+        error: Bad request
+
+  responses:
+    ErrorServidor:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Ocurrió un error en el servidor
+            error: ERROR_INTERNO
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    skuParam:
+      name: sku
+      in: path
+      required: true
+      description: Identificador único del producto
+      schema:
+        type: string
+    idOrden:
+      name: id_orden
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identificador de la orden asociada a la reserva
+    id_tiendaParam:
+      name: id_tienda
+      in: path
+      required: true
+      description: Identificador único de la tienda
+      schema:
+        type: integer
