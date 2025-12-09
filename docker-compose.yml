@@ -1,0 +1,144 @@
+# Docker Compose para Integración de Pulga Shop
+# Este archivo debe colocarse en la carpeta de integración junto con nginx.conf
+#
+# Estructura esperada:
+# carpeta-integracion/
+# ├── pulga-shop-inventario-backend/
+# ├── pulga-shop-inventario-frontend/
+# ├── docker-compose.integration.yml  (este archivo, renombrar a docker-compose.yml)
+# └── nginx.conf
+#
+# Uso: docker compose up -d --build
+
+version: '3.8'
+
+services:
+  # ==================== NGINX (Reverse Proxy) ====================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"           # Puerto principal
+      - "16004:80"        # Puerto del grupo 7
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - appnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ==================== FRONTEND ====================
+  frontend:
+    build:
+      context: ./pulga-shop-inventario-frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:16014/api
+    image: pulga-frontend:integration
+    ports:
+      - "16005:3000"  # Puerto opcional para acceso directo
+    networks:
+      - appnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== BACKEND ====================
+  backend:
+    build:
+      context: ./pulga-shop-inventario-backend
+      dockerfile: Dockerfile
+    image: pulga-backend:integration
+    ports:
+      - "16014:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db_postgres:5432/pulga_shop?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=EstoEsUnSecretoSuperSeguroParaElCursoGPI
+      - JWT_EXPIRES_IN=1d
+      - CORS_ORIGINS=http://localhost,http://localhost:80,http://localhost:16004,http://localhost:16005,http://localhost:16014
+      - CLOUDINARY_CLOUD_NAME=ddvkxibur
+      - CLOUDINARY_API_KEY=312495811152233
+      - CLOUDINARY_API_SECRET=DZrXMHKp_FssIcbtQBuv5kED70k
+    depends_on:
+      db_postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - appnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ==================== POSTGRES ====================
+  db_postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pulga_shop
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./pulga-shop-inventario-backend/dump.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "16010:5432"
+    networks:
+      - appnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== REDIS ====================
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - appnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ==================== PGADMIN (OPCIONAL - COMENTADO) ====================
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: pgadmin
+  #   ports:
+  #     - "8080:80"
+  #   depends_on:
+  #     - db_postgres
+  #   networks:
+  #     - appnet
+  #   restart: unless-stopped
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  appnet:
+    driver: bridge

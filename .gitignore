@@ -1,0 +1,15 @@
+# Node
+node_modules/
+dist/
+pnpm-lock.yaml
+yarn.lock
+
+# Logs
+*.log
+
+# Env
+.env
+*.env
+
+# Docker
+pgdata/
