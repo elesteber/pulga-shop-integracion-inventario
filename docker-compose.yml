@@ -10,15 +10,15 @@
 #
 # Uso: docker compose up -d --build
 
-version: '3.8'
+version: "3.8"
 
 services:
   # ==================== NGINX (Reverse Proxy) ====================
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"           # Puerto principal
-      - "16004:80"        # Puerto del grupo 7
+      - "80:80" # Puerto principal
+      - "16004:80" # Puerto del grupo 7
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
@@ -28,7 +28,15 @@ services:
       - appnet
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:80/health",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -40,12 +48,21 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=http://localhost:16014/api
+        - VITE_DEV=true
     image: pulga-frontend:integration
     networks:
       - appnet
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,7 +77,7 @@ services:
       - "16014:3000"
     environment:
       - PORT=3000
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db_postgres:5432/pulga_shop?schema=public
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -79,7 +96,15 @@ services:
       - appnet
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
