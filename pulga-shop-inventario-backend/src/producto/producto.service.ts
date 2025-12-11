@@ -19,6 +19,7 @@ import { generateSKU } from './utils/generate-sku';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { UserRoles } from 'src/common/interfaces/user.roles.interface';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Injectable()
 export class ProductoService {
@@ -226,7 +227,7 @@ export class ProductoService {
     return updatedProducto;
   }
 
-  async delete(id_vendedor: string, sku: string): Promise<void> {
+  async delete(id_vendedor: string, sku: string, roles: UserRoles): Promise<void> {
     const producto = await this.prisma.producto.findUnique({
       where: { sku, activo: true },
       include: { tienda: true },
@@ -239,7 +240,9 @@ export class ProductoService {
       });
     }
 
-    if (producto.tienda.id_vendedor !== id_vendedor) {
+    const esAdministrador = roles.esAdministrador;
+
+    if (producto.tienda.id_vendedor !== id_vendedor && !esAdministrador) {
       throw new BadRequestException({
         message: 'No tienes permisos para eliminar este producto',
         error: ERROR_CODES.NO_AUTORIZADO,

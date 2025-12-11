@@ -78,7 +78,8 @@ export class ProductoController {
   async delete(
     @CurrentUser('id') id_vendedor: string,
     @Param('sku') sku: string,
+    @CurrentUserRoles() roles: UserRoles,
   ): Promise<void> {
-    await this.productoService.delete(id_vendedor, sku);
+    await this.productoService.delete(id_vendedor, sku, roles);
   }
 }
