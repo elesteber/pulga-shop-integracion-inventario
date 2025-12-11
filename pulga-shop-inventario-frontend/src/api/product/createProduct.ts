@@ -41,7 +41,7 @@ export const createProductSchema = z.object({
     .max(36, { message: "Marca no puede tener más de 36 caracteres." }),
 
   categoria: z.enum([
-    Categoria.ELECTRÓNICA,
+    Categoria.ELECTRONICA,
     Categoria.ROPA,
     Categoria.CALZADO,
     Categoria.HOGAR,
@@ -84,7 +84,7 @@ export const useCreateProductForm = () => {
       stock: 0,
       costo: 0,
       condicion: Condicion.NUEVO,
-      categoria: Categoria.ELECTRÓNICA,
+      categoria: Categoria.ELECTRONICA,
       peso: 0,
       alto: 0,
       largo: 0,

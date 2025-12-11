@@ -27,7 +27,7 @@ SET row_security = off;
 --
 
 CREATE TYPE public.categoria_enum AS ENUM (
-    'ELECTRÓNICA',
+    'ELECTRONICA',
     'ROPA',
     'CALZADO',
     'HOGAR',
@@ -586,10 +586,10 @@ COPY public.ciudad (id_ciudad, nombre) FROM stdin;
 --
 
 COPY public.producto (id_producto, id_tienda, nombre, stock, costo, sku, condicion, fecha_creacion, marca, categoria, descripcion, activo, foto_referencia, peso, alto, largo, ancho) FROM stdin;
-1	1	Notebook Gamer ASUS	5	850000	NB-ASUS-001	NUEVO	2025-12-01 13:55:56.388772	ASUS	ELECTRÓNICA	Laptop alta gama	t	http://img/asus.jpg	2.5	2	35	25
-2	1	Monitor Samsung 24"	3	60000	MON-SAM-002	USADO	2025-12-01 13:55:56.388772	Samsung	ELECTRÓNICA	Monitor con leve uso	t	http://img/mon.jpg	4.0	40	60	10
-3	2	Teclado Mecánico	10	45000	KEY-LOG-003	REACONDICIONADO	2025-12-01 13:55:56.388772	Logitech	ELECTRÓNICA	Teclado reparado por fabrica	t	http://img/key.jpg	1.0	4	45	15
-4	2	Mouse Gamer	20	35000	MOU-RAZ-004	NUEVO	2025-12-01 13:55:56.388772	Razer	ELECTRÓNICA	Mouse sellado	t	http://img/mouse.jpg	0.1	4	12	7
+1	1	Notebook Gamer ASUS	5	850000	NB-ASUS-001	NUEVO	2025-12-01 13:55:56.388772	ASUS	ELECTRONICA	Laptop alta gama	t	http://img/asus.jpg	2.5	2	35	25
+2	1	Monitor Samsung 24"	3	60000	MON-SAM-002	USADO	2025-12-01 13:55:56.388772	Samsung	ELECTRONICA	Monitor con leve uso	t	http://img/mon.jpg	4.0	40	60	10
+3	2	Teclado Mecánico	10	45000	KEY-LOG-003	REACONDICIONADO	2025-12-01 13:55:56.388772	Logitech	ELECTRONICA	Teclado reparado por fabrica	t	http://img/key.jpg	1.0	4	45	15
+4	2	Mouse Gamer	20	35000	MOU-RAZ-004	NUEVO	2025-12-01 13:55:56.388772	Razer	ELECTRONICA	Mouse sellado	t	http://img/mouse.jpg	0.1	4	12	7
 5	3	Chaqueta Cuero	8	120000	CH-CUE-005	USADO	2025-12-01 13:55:56.388772	Zara	ROPA	Vintage en buen estado	t	http://img/chaq.jpg	0.8	0	0	0
 6	3	Zapatillas Urbanas	15	50000	ZAP-NIK-006	REACONDICIONADO	2025-12-01 13:55:56.388772	Nike	CALZADO	Suela restaurada	t	http://img/zap.jpg	0.9	10	30	15
 7	4	Polera Estampada	50	15000	POL-GEN-007	NUEVO	2025-12-01 13:55:56.388772	Genérica	ROPA	Algodón 100%	t	http://img/pol.jpg	0.2	0	0	0

@@ -41,7 +41,7 @@ export let productsInMemory: Product[] = [
     costo: 1000,
     condicion: Condicion.NUEVO,
     stock: 10,
-    categoria: Categoria.ELECTRÓNICA,
+    categoria: Categoria.ELECTRONICA,
     activo: true,
     fecha: new Date(),
     peso: 10,

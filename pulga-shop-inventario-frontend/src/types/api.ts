@@ -19,7 +19,7 @@ export enum Condicion {
 }
 
 export enum Categoria {
-  ELECTRÓNICA = "ELECTRÓNICA",
+  ELECTRONICA = "ELECTRONICA",
   ROPA = "ROPA",
   CALZADO = "CALZADO",
   HOGAR = "HOGAR",
