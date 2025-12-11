@@ -48,7 +48,7 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=http://localhost:16014/api
-        - VITE_DEV=true
+        - VITE_SKIP_AUTH=true
     image: pulga-frontend:integration
     networks:
       - appnet
