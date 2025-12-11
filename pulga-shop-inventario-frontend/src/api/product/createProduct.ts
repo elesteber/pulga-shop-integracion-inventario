@@ -68,7 +68,8 @@ export const createProductSchema = z.object({
 
   peso: z
     .number()
-    .min(0.1, { message: "El peso debe ser mayor que 0.1" })
+    .min(0, { message: "El peso debe ser mayor o igual a 0" })
+    .max(999.9, { message: "El peso debe ser menor a 1000" })
     .refine((val) => val === Math.round(val * 10) / 10, {
       message: "El peso debe tener un máximo de un decimal.",
     }),
