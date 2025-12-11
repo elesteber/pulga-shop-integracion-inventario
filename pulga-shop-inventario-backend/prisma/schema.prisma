@@ -57,7 +57,7 @@ model Producto {
 }
 
 enum categoria_enum {
-  ELECTR__NICA @map("ELECTR??NICA")
+  ELECTRONICA @map("ELECTRÓNICA")
   ROPA
   CALZADO
   HOGAR

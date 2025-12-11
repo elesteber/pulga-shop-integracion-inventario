@@ -157,6 +157,10 @@ export class ProductoService {
 
       return new PageDto(productos, pageMetaDto);
     } catch (error) {
+      console.error('❌ Error en findAll:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
       if (
         error instanceof NotFoundException ||
         error instanceof BadRequestException

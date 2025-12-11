@@ -45,22 +45,28 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      });
+    const secret = this.configService.get<string>('JWT_SECRET');
+    console.log('🔑 Secret cargado:', secret);
+    console.log('🎫 Token recibido:', token.substring(0, 50) + '...');
+  
+    const payload = this.jwtService.verify(token, { secret });
+    console.log('✅ Payload decodificado:', payload);
 
-      request.user = {
-        id: payload.sub || payload.id,
-        email: payload.email,
-        role: payload.role,
-      } as UserPayload;
+    request.user = {
+      id: payload.sub || payload.id,
+      email: payload.email,
+      role: payload.role,
+   } as UserPayload;
 
-      return true;
-    } catch (error) {
-      throw new UnauthorizedException({
-        message: 'Sesión no iniciada',
-        error: ERROR_CODES.NO_AUTORIZADO,
-      });
-    }
+    return true;
+  } catch (error) {
+    console.error('❌ Error tipo:', error.name);
+    console.error('❌ Error mensaje:', error.message);
+    
+    throw new UnauthorizedException({
+      message: 'Sesión no iniciada',
+      error: ERROR_CODES.NO_AUTORIZADO,
+    });
   }
+}
 }

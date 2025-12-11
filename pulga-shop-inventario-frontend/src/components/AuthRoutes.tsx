@@ -1,8 +1,8 @@
 import AppLayout from "../layouts/app/AppLayout";
 
 export default function AuthRoutes() {
-  if (import.meta.env.VITE_SKIP_AUTH === "true" && !localStorage.getItem("jwt")) {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJWRU5EXzAwMSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJyb2xlIjoidmVuZGVkb3IiLCJpYXQiOjE3NjUzMzg3Mzd9.P4VCqqRqmqCwj6EyAzEpn_xMw-rFH4LUDg8CMSLxOk";
+  if (import.meta.env.VITE_SKIP_AUTH === "true") {
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJWRU5EXzAwMSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJyb2xlIjoidmVuZGVkb3IiLCJpYXQiOjE3NjU0MjM1NjUsImV4cCI6MTc2NTUwOTk2NX0.fEFG2K84g9npssWFzTfJtufvr6MYvjACLH66oBxRAcY";
     localStorage.setItem("jwt", token);
   }
 

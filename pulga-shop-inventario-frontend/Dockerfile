@@ -9,7 +9,9 @@ WORKDIR /app
 
 # Accept build arguments for Vite environment variables
 ARG VITE_API_URL
+ARG VITE_SKIP_AUTH
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_SKIP_AUTH=$VITE_SKIP_AUTH
 
 # Install dependencies
 COPY package*.json ./
