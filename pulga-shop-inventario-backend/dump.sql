@@ -586,18 +586,18 @@ COPY public.ciudad (id_ciudad, nombre) FROM stdin;
 --
 
 COPY public.producto (id_producto, id_tienda, nombre, stock, costo, sku, condicion, fecha_creacion, marca, categoria, descripcion, activo, foto_referencia, peso, alto, largo, ancho) FROM stdin;
-1	1	Notebook Gamer ASUS	5	850000	NB-ASUS-001	NUEVO	2025-12-01 13:55:56.388772	ASUS	ELECTRONICA	Laptop alta gama	t	http://img/asus.jpg	2.5	2	35	25
-2	1	Monitor Samsung 24"	3	60000	MON-SAM-002	USADO	2025-12-01 13:55:56.388772	Samsung	ELECTRONICA	Monitor con leve uso	t	http://img/mon.jpg	4.0	40	60	10
-3	2	Teclado Mecánico	10	45000	KEY-LOG-003	REACONDICIONADO	2025-12-01 13:55:56.388772	Logitech	ELECTRONICA	Teclado reparado por fabrica	t	http://img/key.jpg	1.0	4	45	15
-4	2	Mouse Gamer	20	35000	MOU-RAZ-004	NUEVO	2025-12-01 13:55:56.388772	Razer	ELECTRONICA	Mouse sellado	t	http://img/mouse.jpg	0.1	4	12	7
-5	3	Chaqueta Cuero	8	120000	CH-CUE-005	USADO	2025-12-01 13:55:56.388772	Zara	ROPA	Vintage en buen estado	t	http://img/chaq.jpg	0.8	0	0	0
-6	3	Zapatillas Urbanas	15	50000	ZAP-NIK-006	REACONDICIONADO	2025-12-01 13:55:56.388772	Nike	CALZADO	Suela restaurada	t	http://img/zap.jpg	0.9	10	30	15
-7	4	Polera Estampada	50	15000	POL-GEN-007	NUEVO	2025-12-01 13:55:56.388772	Genérica	ROPA	Algodón 100%	t	http://img/pol.jpg	0.2	0	0	0
-8	4	Jeans Clasicos	12	20000	JEA-LEV-008	USADO	2025-12-01 13:55:56.388772	Levis	ROPA	Segunda mano	t	http://img/jeans.jpg	0.6	0	0	0
-9	5	Licuadora Pro	7	30000	LIC-OST-009	REACONDICIONADO	2025-12-01 13:55:56.388772	Oster	HOGAR	Motor cambiado	t	http://img/lic.jpg	2.2	40	20	20
-10	5	Microondas Digital	4	80000	MIC-LG-010	NUEVO	2025-12-01 13:55:56.388772	LG	HOGAR	En caja original	t	http://img/mic.jpg	12.0	30	50	40
-11	6	Refrigerador SideBySide	2	400000	REF-SAM-011	USADO	2025-12-01 13:55:56.388772	Samsung	HOGAR	Detalles estéticos puerta	t	http://img/ref.jpg	80.0	180	90	70
-12	6	Lavadora Carga Frontal	3	250000	LAV-BOS-012	REACONDICIONADO	2025-12-01 13:55:56.388772	Bosch	HOGAR	Panel electrónico nuevo	t	http://img/lav.jpg	65.0	85	60	60
+1	1	Notebook Gamer ASUS	5	850000	NB-ASUS-001	NUEVO	2025-12-01 13:55:56.388772	ASUS	ELECTRONICA	Laptop alta gama	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	2.5	2	35	25
+2	1	Monitor Samsung 24"	3	60000	MON-SAM-002	USADO	2025-12-01 13:55:56.388772	Samsung	ELECTRONICA	Monitor con leve uso	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	4.0	40	60	10
+3	2	Teclado Mecánico	10	45000	KEY-LOG-003	REACONDICIONADO	2025-12-01 13:55:56.388772	Logitech	ELECTRONICA	Teclado reparado por fabrica	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	1.0	4	45	15
+4	2	Mouse Gamer	20	35000	MOU-RAZ-004	NUEVO	2025-12-01 13:55:56.388772	Razer	ELECTRONICA	Mouse sellado	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	0.1	4	12	7
+5	3	Chaqueta Cuero	8	120000	CH-CUE-005	USADO	2025-12-01 13:55:56.388772	Zara	ROPA	Vintage en buen estado	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	0.8	0	0	0
+6	3	Zapatillas Urbanas	15	50000	ZAP-NIK-006	REACONDICIONADO	2025-12-01 13:55:56.388772	Nike	CALZADO	Suela restaurada	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	0.9	10	30	15
+7	4	Polera Estampada	50	15000	POL-GEN-007	NUEVO	2025-12-01 13:55:56.388772	Genérica	ROPA	Algodón 100%	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	0.2	0	0	0
+8	4	Jeans Clasicos	12	20000	JEA-LEV-008	USADO	2025-12-01 13:55:56.388772	Levis	ROPA	Segunda mano	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	0.6	0	0	0
+9	5	Licuadora Pro	7	30000	LIC-OST-009	REACONDICIONADO	2025-12-01 13:55:56.388772	Oster	HOGAR	Motor cambiado	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	2.2	40	20	20
+10	5	Microondas Digital	4	80000	MIC-LG-010	NUEVO	2025-12-01 13:55:56.388772	LG	HOGAR	En caja original	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	12.0	30	50	40
+11	6	Refrigerador SideBySide	2	400000	REF-SAM-011	USADO	2025-12-01 13:55:56.388772	Samsung	HOGAR	Detalles estéticos puerta	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	80.0	180	90	70
+12	6	Lavadora Carga Frontal	3	250000	LAV-BOS-012	REACONDICIONADO	2025-12-01 13:55:56.388772	Bosch	HOGAR	Panel electrónico nuevo	t	https://m.media-amazon.com/images/M/MV5BZDE2ZjIxYzUtZTJjYS00OWQ0LTk2NGEtMDliYmI3MzMwYjhkXkEyXkFqcGdeQWFsZWxvZw@@._V1_.jpg	65.0	85	60	60
 \.
 
 
