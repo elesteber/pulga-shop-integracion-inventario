@@ -51,4 +51,4 @@ backend:
 | Nginx       | 16004  | Punto de entrada (Frontend) |
 | Backend API | 16014  | API                         |
 | PostgreSQL  | 16010  | Base de datos               |
-| Redis       | 6379   | Caché                       |
+| Redis       | 6379   | Caché y reserva de stock    |
