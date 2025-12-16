@@ -68,8 +68,9 @@ export class ProductoController {
     @CurrentUser('id') id_vendedor: string,
     @Param('sku') sku: string,
     @Body() updateProductoDto: UpdateProductoDto,
+    @CurrentUserRoles() roles: UserRoles,
   ): Promise<GetProductoDto> {
-    return this.productoService.update(id_vendedor, sku, updateProductoDto);
+    return this.productoService.update(id_vendedor, sku, updateProductoDto, roles);
   }
 
   @Delete(':sku')

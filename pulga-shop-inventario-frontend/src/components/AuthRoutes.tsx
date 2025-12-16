@@ -18,7 +18,7 @@ export default function AuthRoutes() {
   }
 
   if (import.meta.env.VITE_SKIP_AUTH === "true" && !localStorage.getItem("jwt")) {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJWRU5EXzAwMSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJyb2xlIjoidmVuZGVkb3IiLCJpYXQiOjE3NjU0MjM1NjUsImV4cCI6MTc2NTUwOTk2NX0.fEFG2K84g9npssWFzTfJtufvr6MYvjACLH66oBxRAcY";
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJWRU5EXzAwMSIsImVtYWlsIjoiY29ycmVvQGNvcnJlby5jb20iLCJyb2xlIjoidmVuZGVkb3IiLCJpYXQiOjE3NjU4OTQzODh9.AyrFSZFh-5FIQH35F5SlaiBkvUEQLzsqCTLgH9AD66M";
     localStorage.setItem("jwt", token);
   }
 

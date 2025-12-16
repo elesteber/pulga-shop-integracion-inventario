@@ -180,6 +180,7 @@ export class ProductoService {
     id_vendedor: string,
     sku: string,
     updateProductoDto: UpdateProductoDto,
+    roles: UserRoles,
   ) {
     const producto = await this.prisma.producto.findUnique({
       where: {
@@ -195,7 +196,9 @@ export class ProductoService {
       });
     }
 
-    if (producto.tienda.id_vendedor !== id_vendedor) {
+    const esAdministrador = roles.esAdministrador;
+
+    if (producto.tienda.id_vendedor !== id_vendedor || !esAdministrador) {
       throw new BadRequestException({
         message: 'No tienes permisos para actualizar este producto',
         error: ERROR_CODES.NO_AUTORIZADO,
@@ -242,7 +245,7 @@ export class ProductoService {
 
     const esAdministrador = roles.esAdministrador;
 
-    if (producto.tienda.id_vendedor !== id_vendedor && !esAdministrador) {
+    if (producto.tienda.id_vendedor !== id_vendedor || !esAdministrador) {
       throw new BadRequestException({
         message: 'No tienes permisos para eliminar este producto',
         error: ERROR_CODES.NO_AUTORIZADO,
